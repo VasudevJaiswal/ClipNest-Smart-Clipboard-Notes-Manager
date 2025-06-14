@@ -1,0 +1,1 @@
+# ClipNest-Smart-Clipboard-Notes-Manager
