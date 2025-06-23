@@ -1,6 +1,7 @@
 const historyList = document.getElementById('history');
 const searchInput = document.getElementById('search');
 const clearBtn = document.getElementById('clear');
+const downloadBtn = document.getElementById('download');
 const tipRow = document.getElementById('tipRow');
 const hideTip = document.getElementById('hideTip');
 
@@ -132,6 +133,28 @@ clearBtn.addEventListener('click', () => {
   if (confirm("Clear all clipboard history?")) {
     chrome.storage.local.set({ clipboardHistory: [] }, loadHistory);
   }
+});
+
+downloadBtn.addEventListener('click', () => {
+  chrome.storage.local.get(['clipboardHistory'], ({ clipboardHistory }) => {
+    clipboardHistory = clipboardHistory || [];
+    if (!clipboardHistory.length) {
+      alert('No clipboard history to download.');
+      return;
+    }
+    clipboardHistory = [
+      ...clipboardHistory.filter(x => x.pinned),
+      ...clipboardHistory.filter(x => !x.pinned)
+    ];
+    const text = clipboardHistory.map(item => item.text).join('\n\n-----\n\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'clipboard_history.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
